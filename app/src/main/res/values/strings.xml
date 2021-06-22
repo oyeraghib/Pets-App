@@ -45,4 +45,12 @@
 
     <!-- Label for dropdown menu option if the pet is female [CHAR LIMIT=20] -->
     <string name="gender_female">Female</string>
+
+    <!-- String for toast if insertion of row was unsuccessful -->
+    <string name="editor_insert_pet_failed">New pet insertion failed</string>
+
+    <!-- String for toast if insertion of row was successful -->
+    <string name="insert_pet_successful">Pet Added</string>
+
+
 </resources>

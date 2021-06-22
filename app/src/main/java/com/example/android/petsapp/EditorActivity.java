@@ -3,6 +3,7 @@ package com.example.android.petsapp;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -124,35 +125,29 @@ public class EditorActivity extends AppCompatActivity {
         int weightValue = Integer.parseInt(weightString);
 
 
-
-
-        //Gets the data repository in the right code.
-            SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
             //Create a new map of values where the column name are the keys
-            ContentValues contentValues = new ContentValues();
+            ContentValues values = new ContentValues();
 
-            contentValues.put(PetsEntry.COLUMN_PET_NAME, nameString);
-            contentValues.put(PetsEntry.COLUMN_PET_BREED, breedString);
-            contentValues.put(PetsEntry.COLUMN_PET_WEIGHT, weightValue);
-            contentValues.put(PetsEntry.COLUMN_PET_GENDER, mGender);
+            values.put(PetsEntry.COLUMN_PET_NAME, nameString);
+            values.put(PetsEntry.COLUMN_PET_BREED, breedString);
+            values.put(PetsEntry.COLUMN_PET_GENDER, mGender);
+            values.put(PetsEntry.COLUMN_PET_WEIGHT, weightValue);
 
-            //Insert a new row of data returning the primary key of the row
-            long newRowId;
 
-            newRowId = db.insert(PetsEntry.TABLE_NAME,
-                    null,
-                    contentValues);
+            Uri newUri = getContentResolver().insert(PetsEntry.CONTENT_URI, values);
 
-            //Show a toast message if the insetion of row was successful and also show an error
-            //if not
 
-            if(newRowId == -1) {
-                Toast.makeText(this, "Error entering the row",Toast.LENGTH_SHORT);
+            /** Show a toast message depending upon whether new row was inserted or not */
+
+            if(newUri == null){
+                //If content returning from Database is null or whether or not insertion was successful
+
+                Toast.makeText(this, getString(R.string.editor_insert_pet_failed),Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Row was saved successfully"+ newRowId, Toast.LENGTH_SHORT);
-            }
+                //Otherwise insertion was successful and we can show a toast message
 
+                Toast.makeText(this, getString(R.string.insert_pet_successful), Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override

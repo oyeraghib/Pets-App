@@ -5,9 +5,24 @@ import android.provider.BaseColumns;
 
 public class PetsContract  {
 
+
     private PetsContract() {}
 
+    //Creating constants for the URI
+
+    public static final String CONTENT_AUTHORITY = "com.example.android.petsapp";
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+    public static final String PATH_PETS = "pets";
+
     public static final class PetsEntry implements BaseColumns {
+
+
+        //Complete final URI statement
+
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_PETS);
+
+
 
         public final static String TABLE_NAME ="pets";
 
@@ -21,15 +36,7 @@ public class PetsContract  {
         public static final int GENDER_MALE = 1;
         public static final int GENDER_FEMALE = 2;
 
-        //Creating constants for the URI
 
-        public static final String CONTENT_AUTHORITY = "com.example.android.petsapp";
-        public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-
-        public static final String PATH_PETS = "pets";
-        //Complete final URI statement
-
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_PETS);
 
 
     }
