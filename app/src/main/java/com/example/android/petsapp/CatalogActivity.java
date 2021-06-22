@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -42,8 +43,6 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        mDbHelper = new PetsDbHelper(this);
-
     }
 
     @Override
@@ -53,8 +52,6 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     private void displayDatabaseInfo() {
-        //Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         String[] projection = {
                 PetsEntry._ID,
@@ -62,7 +59,7 @@ public class CatalogActivity extends AppCompatActivity {
         PetsEntry.COLUMN_PET_BREED,
                 PetsEntry.COLUMN_PET_GENDER,
         PetsEntry.COLUMN_PET_WEIGHT};
-
+/**
         Cursor cursor = db.query(
                 PetsEntry.TABLE_NAME,
                 projection,
@@ -71,6 +68,18 @@ public class CatalogActivity extends AppCompatActivity {
                 null,
                 null,
                 null);
+*/
+        //Perform the query on the provider  using ContentResolver.
+        //Use the {@link PetEntry#Content_URI} to access the pet data.
+
+
+         Cursor cursor = getContentResolver().query(
+             PetsEntry.CONTENT_URI,                 //The content URI of the words table
+             projection,                            //The columns to return for each row
+                 null,                     //Row Selection Criteria
+            null,                       //Row Selection Criteria
+            null);                          //The sort order for the returned rows.
+
 
 
         TextView displayView = (TextView) findViewById(R.id.text_view_pet);
@@ -129,22 +138,17 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     public void insertPet() {
-        //Gets the data repository in write node
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         //Create a new map of values where the column name are the keys
         ContentValues values = new ContentValues();
         values.put(PetsEntry.COLUMN_PET_NAME, "Toto");
         values.put(PetsEntry.COLUMN_PET_BREED, "Terrier");
-        values.put(PetsEntry.COLUMN_PET_GENDER, PetsEntry.COLUMN_PET_GENDER);
+        values.put(PetsEntry.COLUMN_PET_GENDER, PetsEntry.GENDER_MALE);
         values.put(PetsEntry.COLUMN_PET_WEIGHT, 4);
 
-        //Insert the row returning the primary key value of the new row
-        long newRowId;
-        newRowId = db.insert(
-                PetsEntry.TABLE_NAME,
-                null,
-                values);
+
+
+        Uri newUri = getContentResolver().insert(PetsEntry.CONTENT_URI, values);
 
     }
 
