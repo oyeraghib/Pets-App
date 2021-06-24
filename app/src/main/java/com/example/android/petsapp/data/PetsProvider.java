@@ -12,6 +12,8 @@ import android.util.Log;
 
 import com.example.android.petsapp.data.PetsContract.PetsEntry;
 
+import java.util.IllformedLocaleException;
+
 
 public class PetsProvider extends ContentProvider {
     //Tag for the log message
@@ -95,7 +97,17 @@ public class PetsProvider extends ContentProvider {
 
     @Override
     public String getType( Uri uri) {
-        return null;
+
+        final int match = sUriMatcher.match(uri);
+
+        switch (match) {
+            case PETS:
+                return PetsEntry.CONTENT_LIST_TYPE;
+            case PETS_ID:
+                return PetsEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalArgumentException("Unknown URI " + uri + "with match" + match);
+        }
     }
 
 
@@ -132,13 +144,84 @@ public class PetsProvider extends ContentProvider {
 
     @Override
     public int delete( Uri uri,  String selection,  String[] selectionArgs) {
-        return 0;
+
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+
+        switch (match) {
+            case PETS:
+                return database.delete(PetsEntry.TABLE_NAME, selection, selectionArgs);
+            case PETS_ID:
+                selection = PetsEntry._ID + "=?";
+                selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri)) };
+
+                return database.delete(PetsEntry.TABLE_NAME, selection, selectionArgs);
+
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for URI" + uri);
+
+        }
+
     }
 
     @Override
     public int update( Uri uri,  ContentValues values,  String selection,  String[] selectionArgs) {
-        return 0;
+
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return updatePet(uri, values, selection, selectionArgs);
+            case PETS_ID:
+                selection = PetsEntry._ID + "=?";
+                selectionArgs = new String[] {
+                        String.valueOf(ContentUris.parseId(uri))
+                } ;
+                return updatePet(uri, values, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for URI "+ uri);
+        }
     }
 
+    private int updatePet(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+
+        //If the {@link PetEntry#COLUMN_PET_NAME} key is present
+        //check that the value is not null
+        if(values.containsKey(PetsEntry.COLUMN_PET_NAME)){
+            String name = values.getAsString(PetsEntry.COLUMN_PET_NAME);
+        if (name == null) {
+            throw new IllegalArgumentException("Pet requires a name");
+        }
+        }
+
+        //If the {@link PetsEntry#COLUMN_PET_GENDER} key has a value
+        //check that the value is not null
+        if(values.containsKey(PetsEntry.COLUMN_PET_GENDER)){
+            Integer gender = values.getAsInteger(PetsEntry.COLUMN_PET_GENDER);
+            if(gender == null || !PetsEntry.isValid(gender)) {
+                throw new IllegalArgumentException("Pet requires a gender");
+            }
+        }
+
+        //If the {@link PetsEntry#COLUMN_PET_WEIGHT} key has a value
+        //check that the value is not null
+        if(values.containsKey(PetsEntry.COLUMN_PET_WEIGHT)){
+            Integer weight = values.getAsInteger(PetsEntry.COLUMN_PET_WEIGHT);
+            if(weight == null && weight < 0){
+                throw new IllegalArgumentException("Pet requires valid weight");
+            }
+        }
+
+        //If there are no values to update then don't try to update the database
+        if(values.size() == 0){
+            return 0;
+        }
+
+        //Otherwise get writeable database to update the data
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        //Returns the number of database rows affected by the update statement
+        return database.update(PetsEntry.TABLE_NAME, values, selection, selectionArgs);
+    }
 
 }
